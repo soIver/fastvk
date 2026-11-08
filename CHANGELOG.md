@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Fixed
 
+- `Uploader` preserves non-empty `access_key` values returned by VK for photos,
+  documents, audio messages, and graffiti in attachment strings.
 - Filters are now evaluated with **short-circuit** semantics — the first
   failing filter stops evaluation instead of running all of them.
 - Middleware can now pass data into handlers: values placed in the middleware
