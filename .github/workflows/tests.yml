@@ -2,9 +2,10 @@ name: Tests
 
 on:
   push:
-    branches: [master]
+    branches: [master, integration, 'fix/**']
   pull_request:
     branches: [master]
+  workflow_call:
 
 jobs:
   test:

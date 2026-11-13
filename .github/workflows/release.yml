@@ -5,8 +5,12 @@ on:
     branches: [master]
 
 jobs:
+  validation:
+    uses: ./.github/workflows/tests.yml
+
   release:
     name: Build & publish
+    needs: validation
     runs-on: ubuntu-latest
     permissions:
       contents: write

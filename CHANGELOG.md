@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Fixed
 
+- Static checks pass for the library and tests. Releases require the Python
+  3.10–3.13 validation matrix to succeed; integration and fix branches run CI.
 - Message method models accept alternative recipients and message identifiers:
   `messages.send` supports `peer_ids` and media without text, `messages.edit`
   accepts `cmid` (also `conversation_message_id`), and `messages.delete` accepts
