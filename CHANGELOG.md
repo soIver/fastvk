@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Fixed
 
+- FastVK delegates only known VK API namespaces. Missing optional application
+  attributes now raise `AttributeError` instead of becoming API method proxies.
 - Static checks pass for the library and tests. Releases require the Python
   3.10–3.13 validation matrix to succeed; integration and fix branches run CI.
 - Message method models accept alternative recipients and message identifiers:
