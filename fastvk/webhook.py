@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import TYPE_CHECKING
 
 from aiohttp import web
+from pydantic import ValidationError
 
 from .types.update import Update
 
@@ -27,15 +29,19 @@ class WebhookHandler:
         *,
         confirmation_token: str,
         secret: str | None = None,
+        handle_in_background: bool = True,
     ) -> None:
         self._app = app
         self._confirmation_token = confirmation_token
         self._secret = secret
+        self._handle_in_background = handle_in_background
 
     async def handle(self, request: web.Request) -> web.Response:
         try:
-            data: dict = await request.json()
+            data = await request.json()
         except Exception:
+            return web.Response(text="bad request", status=400)
+        if not isinstance(data, dict):
             return web.Response(text="bad request", status=400)
 
         if self._secret and data.get("secret") != self._secret:
@@ -52,8 +58,16 @@ class WebhookHandler:
                 group_id=data.get("group_id", self._app.group_id),
                 event_id=data.get("event_id", ""),
             )
-            self._app._spawn(update)
-        except Exception as exc:
+        except (KeyError, TypeError, ValidationError) as exc:
             logger.error("Webhook parse error: %s", exc)
+            return web.Response(text="bad request", status=400)
+
+        try:
+            task = self._app._spawn(update)
+            if not self._handle_in_background:
+                await asyncio.shield(task)
+        except Exception:
+            logger.exception("Webhook dispatch failed")
+            return web.Response(text="processing failed", status=503)
 
         return web.Response(text="ok")

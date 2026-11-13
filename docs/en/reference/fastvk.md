@@ -16,10 +16,10 @@ from fastvk import (
 
 ## FastVK
 
-`FastVK` is a subclass of `Bot` with convenience `run_polling()`.
+`FastVK` is a subclass of `Router` with a `Bot` API client and transport runners.
 
 ```python
-class FastVK(Bot):
+class FastVK(Router):
     def __init__(
         self,
         token: str,
@@ -29,6 +29,7 @@ class FastVK(Bot):
         lifespan: AsyncContextManager | None = None,
         dashboard: BaseDashboard | None = None,
         throttle_rate: float = 1.0,
+        webhook_background: bool = True,
     ) -> None: ...
 
     def run_polling(self) -> None:
@@ -39,6 +40,7 @@ class FastVK(Bot):
 |---|---|---|
 | `group_id` | `None` | Group ID. If omitted, resolved automatically from the token via `groups.getById` at startup. |
 | `throttle_rate` | `1.0` | Minimum seconds between messages from the same user. Pass `0` to disable. |
+| `webhook_background` | `True` | Acknowledge webhook events before processing; use `False` to return HTTP 503 on handler failure. |
 
 ## ThrottlingMiddleware
 

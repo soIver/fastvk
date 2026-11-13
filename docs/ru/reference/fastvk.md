@@ -29,6 +29,7 @@ class FastVK(Bot):
         lifespan: AsyncContextManager | None = None,
         dashboard: BaseDashboard | None = None,
         throttle_rate: float = 1.0,
+        webhook_background: bool = True,
     ) -> None: ...
 
     def run_polling(self) -> None:
@@ -39,6 +40,7 @@ class FastVK(Bot):
 |---|---|---|
 | `group_id` | `None` | ID группы. Если не передан — определяется автоматически из токена через `groups.getById` при старте. |
 | `throttle_rate` | `1.0` | Минимальный интервал между сообщениями от одного пользователя (секунды). Передай `0` чтобы отключить. |
+| `webhook_background` | `True` | Подтверждать webhook до обработки; `False` позволяет вернуть HTTP 503 при ошибке обработчика. |
 
 ## ThrottlingMiddleware
 
