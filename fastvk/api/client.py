@@ -14,6 +14,7 @@ import aiohttp
 from ..__meta__ import _api_base_url_, _api_version_
 from .._files import CHUNK_SIZE, open_file, run_io
 from ..exceptions import VKAPIError
+from ..formatting import prepare_formatted_message_params
 from ..types.group import Group
 from ..types.user import User
 
@@ -137,6 +138,7 @@ class Bot:
         return self._session
 
     async def _call(self, method: str, **kwargs: Any) -> Any:
+        kwargs = prepare_formatted_message_params(method, kwargs)
         captcha_sid: str | None = None
         captcha_key: str | None = None
 

@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
 
 if TYPE_CHECKING:
     from ..api.client import Bot
+    from ..enums.parse_mode import ParseMode
     from .user import User
 
 
@@ -73,6 +74,7 @@ class CallbackQuery(BaseModel):
         *,
         keyboard: Any = None,
         attachment: str | None = None,
+        parse_mode: ParseMode | str | None = None,
     ) -> int:
         """Edit the message the pressed button belongs to."""
         assert self._bot is not None
@@ -80,6 +82,7 @@ class CallbackQuery(BaseModel):
             peer_id=self.peer_id,
             cmid=self.conversation_message_id,
             message=text,
+            parse_mode=parse_mode,
             keyboard=str(keyboard) if keyboard is not None else None,
             attachment=attachment,
         )

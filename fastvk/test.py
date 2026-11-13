@@ -5,6 +5,7 @@ from collections.abc import Sequence
 from typing import Any
 
 from .api.client import Bot
+from .formatting import prepare_formatted_message_params
 from .fsm.storage import BaseStorage, MemoryStorage
 from .router import Router
 from .types.update import Update
@@ -52,7 +53,7 @@ class MockedBot(Bot):
         self._results[method] = value
 
     async def _call(self, method: str, **kwargs: Any) -> Any:
-        self.calls.append(MockedBot.Call(method, kwargs))
+        self.calls.append(MockedBot.Call(method, prepare_formatted_message_params(method, kwargs)))
         result = self._results.get(method)
         return result() if callable(result) else result
 

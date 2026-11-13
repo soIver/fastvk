@@ -95,7 +95,7 @@ class Message(BaseModel):
             message=text,
             random_id=random.randint(0, 2**31),
             keyboard=str(keyboard) if keyboard is not None else None,
-            content_source=str(parse_mode) if parse_mode is not None else None,
+            parse_mode=parse_mode,
             dont_parse_links=int(dont_parse_links) if dont_parse_links else None,
             disable_mentions=int(disable_mentions) if disable_mentions else None,
         )
@@ -105,6 +105,7 @@ class Message(BaseModel):
         text: str,
         *,
         keyboard: Keyboard | str | None = None,
+        parse_mode: ParseMode | str | None = None,
         dont_parse_links: bool = False,
         disable_mentions: bool = False,
     ) -> int:
@@ -113,6 +114,7 @@ class Message(BaseModel):
             peer_id=self.peer_id,
             message=text,
             reply_to=self.id,
+            parse_mode=parse_mode,
             random_id=random.randint(0, 2**31),
             keyboard=str(keyboard) if keyboard is not None else None,
             dont_parse_links=int(dont_parse_links) if dont_parse_links else None,
@@ -206,6 +208,7 @@ class Message(BaseModel):
         *,
         keyboard: Keyboard | str | None = None,
         attachment: str | None = None,
+        parse_mode: ParseMode | str | None = None,
         dont_parse_links: bool = False,
         disable_mentions: bool = False,
     ) -> int:
@@ -215,6 +218,7 @@ class Message(BaseModel):
             peer_id=self.peer_id,
             message_id=self.id,
             message=text,
+            parse_mode=parse_mode,
             keyboard=str(keyboard) if keyboard is not None else None,
             attachment=attachment,
             dont_parse_links=int(dont_parse_links) if dont_parse_links else None,

@@ -5,6 +5,7 @@ from typing import Any
 
 from pydantic import AliasChoices, Field, model_validator
 
+from ..enums.parse_mode import ParseMode
 from .base import VKMethod
 
 
@@ -31,6 +32,8 @@ class MessagesSend(VKMethod[int | list[dict[str, Any]]]):
     forward_messages: int | str | None = None
     forward: str | None = None
     content_source: str | None = None
+    parse_mode: ParseMode | str | None = None
+    format_data: str | None = None
     intent: str | None = None
     subscribe_id: int | None = None
     template: str | None = None
@@ -153,6 +156,8 @@ class MessagesEdit(VKMethod[int]):
     dont_parse_links: int | None = None
     disable_mentions: int | None = None
     content_source: str | None = None
+    parse_mode: ParseMode | str | None = None
+    format_data: str | None = None
     template: str | None = None
     keep_forward_messages: int = 0
     keep_snippets: int = 0

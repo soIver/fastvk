@@ -108,6 +108,23 @@ user = await bot.get_user(123456)
 user = await bot.get_user(123456, fields="photo_200,city")
 ```
 
+### Message formatting
+
+`messages.send` and `messages.edit` accept `parse_mode=ParseMode.MARKDOWN`
+or `"markdown"`. FastVK converts `__bold__` and `_italic_` to VK `format_data`
+and removes the markers from the message. Offsets use UTF-16 and the visible
+text of `@id123(Name)` / `@club123(Name)` mentions. Unclosed markers remain literal.
+This is a limited syntax, not a full Markdown or HTML parser.
+
+Formatting works for dynamic calls, typed methods, `emit()`, `Message.answer()`,
+`reply()`, `edit()`, and `CallbackQuery.edit_message()`. Without `parse_mode`,
+text is unchanged. JSON `content_source` metadata is preserved; the legacy
+`content_source="markdown"` spelling is accepted for compatibility.
+
+The pure functions `get_format_data_for_message()` and
+`prepare_formatted_message_params()` are available from `fastvk.formatting`.
+Preparation does not mutate the input and can be repeated safely.
+
 ### execute / execute_batch
 
 ```python

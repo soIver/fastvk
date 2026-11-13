@@ -53,6 +53,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- Message formatting converts `__bold__` and `_italic_` to VK `format_data`
+  with UTF-16 offsets and mention-aware lengths across all message call paths.
 - `Bot.download_to(url, dest)` streams downloads to disk with atomic replacement
   and cleanup on failure or cancellation. `download()` retains its bytes return value.
 - `FastVK(webhook_background=False)` waits for webhook processing and returns
