@@ -132,6 +132,18 @@ async def download(self, url: str, dest: str | Path | None = None) -> bytes
 ```
 
 Download a file (e.g. an attachment URL). Writes to `dest` if given.
+The return value buffers the entire file in memory, even with `dest`.
+
+### download_to
+
+```python
+async def download_to(self, url: str, dest: str | Path) -> Path
+```
+
+Stream a file to disk in 64 KiB chunks without buffering the entire response.
+The destination is replaced only after a successful download. On error or
+cancellation, the temporary file is removed and an existing destination is
+preserved. The destination's parent directory must exist.
 
 ### set_captcha_handler
 

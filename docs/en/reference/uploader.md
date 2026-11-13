@@ -6,6 +6,10 @@ from fastvk import Uploader
 
 Module for uploading media files (photos, documents, audio messages, graffiti) to VK messages.
 
+Files are read in 64 KiB chunks, with file I/O performed outside the event loop.
+Paths are opened and closed by the uploader. File-like objects remain owned
+by the caller: they are read from their current position and are not closed.
+
 ## Initialization
 
 ```python
