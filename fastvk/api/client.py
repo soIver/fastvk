@@ -14,6 +14,13 @@ import aiohttp
 from ..__meta__ import _api_base_url_, _api_version_
 from .._files import CHUNK_SIZE, open_file, run_io
 from ..exceptions import VKAPIError
+from ..execute import (
+    EXECUTE_BATCH_SIZE,
+    VKCall,
+    VKCallResult,
+    build_execute_batch,
+    parse_execute_results,
+)
 from ..formatting import prepare_formatted_message_params
 from ..types.group import Group
 from ..types.user import User
@@ -139,6 +146,10 @@ class Bot:
 
     async def _call(self, method: str, **kwargs: Any) -> Any:
         kwargs = prepare_formatted_message_params(method, kwargs)
+        data = await self._call_raw(method, **kwargs)
+        return data.get("response")
+
+    async def _call_raw(self, method: str, **kwargs: Any) -> dict[str, Any]:
         captcha_sid: str | None = None
         captcha_key: str | None = None
 
@@ -186,7 +197,7 @@ class Bot:
                         await asyncio.sleep(delay)
                         continue
                     raise VKAPIError(err)
-                return data.get("response")
+                return data
             except (aiohttp.ClientError, asyncio.TimeoutError) as e:
                 if attempt < self._max_retries:
                     delay = self._retry_delay * (2**attempt) + random.uniform(0, 1)
@@ -207,7 +218,7 @@ class Bot:
         params = method.model_dump(by_alias=True, exclude_none=True)
         return await self._call(method.__api_method__, **params)
 
-    async def execute(self, code: str) -> Any:
+    async def execute(self, code: str, **params: Any) -> Any:
         """
         Run a VKScript snippet server-side via ``execute`` (up to 25 API calls at once).
 
@@ -219,7 +230,25 @@ class Bot:
         ''')
         ```
         """
-        return await self._call("execute", code=code)
+        return await self._call("execute", code=code, **params)
+
+    async def execute_detailed(self, code: str, **params: Any) -> dict[str, Any]:
+        """Return the complete execute envelope, including nested execute_errors."""
+        return await self._call_raw("execute", code=code, **params)
+
+    async def execute_batch_detailed(
+        self, calls: list[VKCall | tuple[str, dict[str, Any]]],
+    ) -> list[VKCallResult]:
+        """Execute ordered batches of at most 25 calls without retrying nested errors."""
+        prepared = [call if isinstance(call, VKCall) else VKCall(*call) for call in calls]
+        batches = [build_execute_batch(prepared[i:i + EXECUTE_BATCH_SIZE])
+                   for i in range(0, len(prepared), EXECUTE_BATCH_SIZE)]
+        results: list[VKCallResult] = []
+        for index, (code, arguments) in enumerate(batches):
+            response = await self.execute_detailed(code, **arguments)
+            count = min(EXECUTE_BATCH_SIZE, len(prepared) - index * EXECUTE_BATCH_SIZE)
+            results.extend(parse_execute_results(response, count))
+        return results
 
     async def execute_batch(
         self,
@@ -235,16 +264,12 @@ class Bot:
         ])
         ```
         """
-        import json as _json
-
         if len(calls) > 25:
             raise ValueError("execute_batch accepts at most 25 calls per request")
-        parts = [
-            f'API.{method}({_json.dumps(args, ensure_ascii=False)})'
-            for method, args in calls
-        ]
-        code = "return [" + ",".join(parts) + "];"
-        result = await self.execute(code)
+        if not calls:
+            return []
+        code, arguments = build_execute_batch([VKCall(method, args) for method, args in calls])
+        result = await self.execute(code, **arguments)
         return result if isinstance(result, list) else []
 
     async def download(

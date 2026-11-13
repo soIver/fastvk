@@ -142,6 +142,31 @@ results = await bot.execute_batch([
 ])
 ```
 
+### execute_detailed / execute_batch_detailed
+
+`execute_detailed(code, **params)` returns the complete VK response envelope,
+including `execute_errors`. Ordinary `execute()` still returns only `response`.
+`execute_batch_detailed(calls)` accepts `(method, params)` tuples or `VKCall`
+objects and splits them into sequential batches of at most 25 calls.
+
+```python
+from fastvk import VKCall
+
+results = await bot.execute_batch_detailed([
+    VKCall("messages.edit", {"peer_id": 123, "cmid": 7, "message": "Updated"}),
+    ("users.get", {"user_ids": 123}),
+])
+for result in results:
+    if result.error is not None:
+        print(result.error.code, result.error.message, result.error.method)
+```
+
+Each `VKCallResult` has `value`, optional `error`, and `succeeded`. Errors are
+associated with failed (`false`) entries in order. Missing results are failures.
+Nested errors do not trigger retries of successful operations in the same batch.
+Top-level API and network errors use the client's existing retry policy.
+Batch values are passed via `Args`; `parse_mode` works as in direct message calls.
+
 ### download
 
 ```python

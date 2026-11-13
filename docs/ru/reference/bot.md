@@ -142,6 +142,32 @@ results = await bot.execute_batch([
 ])
 ```
 
+### execute_detailed / execute_batch_detailed
+
+`execute_detailed(code, **params)` возвращает полный ответ VK, включая
+`execute_errors`. Обычный `execute()` по-прежнему возвращает только `response`.
+`execute_batch_detailed(calls)` принимает пары `(method, params)` или объекты
+`VKCall` и выполняет последовательные пакеты максимум по 25 вызовов.
+
+```python
+from fastvk import VKCall
+
+results = await bot.execute_batch_detailed([
+    VKCall("messages.edit", {"peer_id": 123, "cmid": 7, "message": "Обновлено"}),
+    ("users.get", {"user_ids": 123}),
+])
+for result in results:
+    if result.error is not None:
+        print(result.error.code, result.error.message, result.error.method)
+```
+
+`VKCallResult` содержит `value`, необязательную `error` и признак `succeeded`.
+Вложенные ошибки сопоставляются результатам `false` по порядку. Отсутствующие
+результаты считаются неудачными. Вложенная ошибка не приводит к повтору успешных
+операций того же пакета. Ошибки верхнего уровня и сети обрабатываются обычным
+механизмом повторов клиента. Значения параметров передаются через `Args`;
+`parse_mode` работает так же, как при непосредственном вызове метода.
+
 ### download
 
 ```python

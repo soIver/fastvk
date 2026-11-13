@@ -6,6 +6,7 @@ from .app import FastVK
 from .background import BackgroundTasks
 from .callback_data import CallbackData
 from .enums import ChatAction, Color, ParseMode
+from .execute import VKCall, VKCallResult, VKExecuteError
 from .filters.builtin import (
     Command,
     CommandHelp,
@@ -46,6 +47,9 @@ __all__ = [
     "Router",
     "Scheduler",
     "Uploader",
+    "VKCall",
+    "VKCallResult",
+    "VKExecuteError",
     "dashboard",
     "enums",
     "filters",

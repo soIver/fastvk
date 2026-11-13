@@ -57,6 +57,13 @@ class MockedBot(Bot):
         result = self._results.get(method)
         return result() if callable(result) else result
 
+    async def execute_detailed(self, code: str, **params: Any) -> dict[str, Any]:
+        """Return a full envelope configured with set_result('execute', ...)."""
+        result = await self._call("execute", code=code, **params)
+        if isinstance(result, dict) and "response" in result:
+            return result
+        return {"response": result}
+
     async def close(self) -> None:
         return None
 

@@ -53,6 +53,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- `execute_detailed()` preserves the full response and nested `execute_errors`.
+  `execute_batch_detailed()` returns ordered `VKCallResult` objects, splits calls
+  into batches of 25, and never retries a batch because of a nested error.
+  Batch parameters use `Args` and share direct message formatting.
+
 - Message formatting converts `__bold__` and `_italic_` to VK `format_data`
   with UTF-16 offsets and mention-aware lengths across all message call paths.
 - `Bot.download_to(url, dest)` streams downloads to disk with atomic replacement
