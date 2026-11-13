@@ -264,6 +264,8 @@ def generate(schema_dir: Path, out_dir: Path) -> None:
         uses_field = any(r[3] for r in rendered)
 
         chunks = [_HEADER]
+        if ns != ns.lower():
+            chunks.append("# ruff: noqa: N999\n")
         if uses_field:
             chunks.append("from pydantic import Field\n\n")
         chunks.append("from ..base import VKMethod\n\n\n")

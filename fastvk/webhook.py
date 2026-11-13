@@ -39,7 +39,7 @@ class WebhookHandler:
     async def handle(self, request: web.Request) -> web.Response:
         try:
             data = await request.json()
-        except Exception:
+        except ValueError:
             return web.Response(text="bad request", status=400)
         if not isinstance(data, dict):
             return web.Response(text="bad request", status=400)
