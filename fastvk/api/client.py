@@ -3,13 +3,16 @@ from __future__ import annotations
 import asyncio
 import logging
 import random
+import tempfile
 from collections.abc import Awaitable, Callable
+from functools import partial
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, BinaryIO, TypeVar, cast
 
 import aiohttp
 
 from ..__meta__ import _api_base_url_, _api_version_
+from .._files import CHUNK_SIZE, open_file, run_io
 from ..exceptions import VKAPIError
 from ..types.group import Group
 from ..types.user import User
@@ -251,14 +254,40 @@ class Bot:
         Download a file (e.g. an attachment URL) and return its bytes.
 
         If *dest* is given, the content is also written to that path.
+        Use :meth:`download_to` to save large files without buffering them in memory.
         """
         session = await self._get_session()
         async with session.get(url) as resp:
             resp.raise_for_status()
             content = await resp.read()
         if dest is not None:
-            Path(dest).write_bytes(content)
+            await run_io(lambda: Path(dest).write_bytes(content))
         return content
+
+    async def download_to(self, url: str, dest: str | Path) -> Path:
+        """Stream a file to disk and return its path, replacing it only on success."""
+        destination = Path(dest)
+        temporary: Path | None = None
+
+        def create_temporary() -> BinaryIO:
+            nonlocal temporary
+            stream = tempfile.NamedTemporaryFile(dir=destination.parent, delete=False)  # noqa: SIM115
+            temporary = Path(stream.name)
+            return cast(BinaryIO, stream)
+
+        session = await self._get_session()
+        try:
+            async with session.get(url) as resp:
+                resp.raise_for_status()
+                async with open_file(create_temporary) as stream:
+                    async for chunk in resp.content.iter_chunked(CHUNK_SIZE):
+                        await run_io(partial(stream.write, chunk))
+                assert temporary is not None
+                await run_io(lambda: temporary.replace(destination))
+            return destination
+        finally:
+            if temporary is not None:
+                await run_io(lambda: temporary.unlink(missing_ok=True))
 
     async def get_user(self, user_id: int, fields: str = "") -> User:
         """Return info about a user by ID."""

@@ -25,6 +25,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
   `conversation_message_id` instead of the global `id`.
 - `Uploader` preserves non-empty `access_key` values returned by VK for photos,
   documents, audio messages, and graffiti in attachment strings.
+- Media uploads stream file contents instead of reading entire files into memory.
+  File operations run outside the event loop and caller-owned streams stay open.
 - Filters are now evaluated with **short-circuit** semantics — the first
   failing filter stops evaluation instead of running all of them.
 - Middleware can now pass data into handlers: values placed in the middleware
@@ -43,6 +45,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- `Bot.download_to(url, dest)` streams downloads to disk with atomic replacement
+  and cleanup on failure or cancellation. `download()` retains its bytes return value.
 - **Full VK API method coverage** — `fastvk.methods` now ships a typed
   `VKMethod` subclass for **every** method (~570), generated from the official
   VK API schema by `scripts/gen_methods.py` into `fastvk/methods/_generated/`.

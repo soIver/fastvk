@@ -12,6 +12,10 @@ When no key is returned, the format remains `photo123456_789012` or
 `doc123456_789012`. Store and reuse the complete returned string, including
 the key, when sending the attachment again.
 
+Files are read in 64 KiB chunks, with file I/O performed outside the event loop.
+Paths are opened and closed by the uploader. File-like objects remain owned
+by the caller: they are read from their current position and are not closed.
+
 ## Initialization
 
 ```python
