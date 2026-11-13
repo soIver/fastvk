@@ -279,7 +279,7 @@ def generate(schema_dir: Path, out_dir: Path) -> None:
         total += len(methods)
 
     init = [_HEADER]
-    for ns in ns_names:
+    for ns in sorted(ns_names, key=str.casefold):
         init.append(f"from . import {ns} as {ns}\n")
     init.append("\n")
     init.append("GENERATED_REGISTRY: dict[str, type] = {}\n")
@@ -291,9 +291,10 @@ def generate(schema_dir: Path, out_dir: Path) -> None:
         init.append(f'    "{ns}",\n')
     init.append(")\n\n")
     init.append("__all__ = [\n")
+    init.append('    "GENERATED_NAMESPACES",\n    "GENERATED_REGISTRY",\n')
     for ns in ns_names:
         init.append(f'    "{ns}",\n')
-    init.append('    "GENERATED_REGISTRY",\n    "GENERATED_NAMESPACES",\n]\n')
+    init.append("]\n")
     (out_dir / "__init__.py").write_text("".join(init), "utf-8")
 
     print(f"generated {total} methods across {len(ns_names)} namespaces -> {out_dir}")
