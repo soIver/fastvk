@@ -16,6 +16,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Fixed
 
+- Failed or cancelled updates can be delivered again; concurrent duplicates share
+  the original result, and successful event IDs are scoped to their group.
+  Processing errors propagate to callers, background tasks retrieve exceptions,
+  and shutdown awaits cancellation cleanup before closing resources.
 - Filters are now evaluated with **short-circuit** semantics — the first
   failing filter stops evaluation instead of running all of them.
 - Middleware can now pass data into handlers: values placed in the middleware
@@ -34,6 +38,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- `FastVK(webhook_background=False)` waits for webhook processing and returns
+  HTTP 503 on failure. The existing background acknowledgement remains the default.
 - **Full VK API method coverage** — `fastvk.methods` now ships a typed
   `VKMethod` subclass for **every** method (~570), generated from the official
   VK API schema by `scripts/gen_methods.py` into `fastvk/methods/_generated/`.

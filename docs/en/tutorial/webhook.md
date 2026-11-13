@@ -78,8 +78,17 @@ The dashboard serves `/metrics` too, so polling bots can be scraped as well.
 
 ## Duplicate deliveries
 
-VK re-sends a Callback API event if it doesn't get `"ok"` fast enough. FastVK
-de-duplicates by `event_id`, so a retried event is not processed twice.
+FastVK de-duplicates successful deliveries by `(group_id, event_id)` in a bounded
+in-memory cache. Concurrent duplicates wait for the original result. Failures
+and cancellations are not cached, so a later delivery may retry processing.
+This cache does not survive restarts or coordinate multiple processes.
+
+The default `FastVK(..., webhook_background=True)` acknowledges an event before
+processing it. An error after that acknowledgement cannot request VK redelivery.
+Use `FastVK(..., webhook_background=False)` to wait for processing: success returns
+`ok`, while handler failures return HTTP 503. This mode is subject to VK request
+timeouts; it is not a persistent queue. Handlers must tolerate re-execution after
+partial external side effects. Malformed event payloads return HTTP 400.
 
 ## Local development with ngrok
 

@@ -179,7 +179,7 @@ class TestWebhookUpdateDispatch:
         client = await _make_client(handler)
 
         resp = await client.post("/", json={"type": "broken_event"})
-        assert resp.status == 200
-        assert await resp.text() == "ok"
+        assert resp.status == 400
+        assert await resp.text() == "bad request"
 
         await client.close()
