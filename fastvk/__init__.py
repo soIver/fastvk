@@ -22,6 +22,7 @@ from .router import Router
 from .scheduler import Scheduler
 from .types.callback import CallbackQuery
 from .types.group import Group
+from .types.sent_message import SentMessage
 from .upload import Uploader
 
 __all__ = [
@@ -46,6 +47,7 @@ __all__ = [
     "Regexp",
     "Router",
     "Scheduler",
+    "SentMessage",
     "Uploader",
     "VKCall",
     "VKCallResult",

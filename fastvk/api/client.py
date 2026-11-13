@@ -23,6 +23,7 @@ from ..execute import (
 )
 from ..formatting import prepare_formatted_message_params
 from ..types.group import Group
+from ..types.sent_message import SentMessage
 from ..types.user import User
 
 if TYPE_CHECKING:
@@ -217,6 +218,40 @@ class Bot:
     async def __call__(self, method: VKMethod[_T]) -> _T:
         params = method.model_dump(by_alias=True, exclude_none=True)
         return await self._call(method.__api_method__, **params)
+
+    async def send_message(
+        self,
+        peer_id: int,
+        message: str | None = None,
+        *,
+        reply_to_conversation_message_id: int | None = None,
+        **params: Any,
+    ) -> SentMessage:
+        """Send to one peer and return both conversation and optional global IDs."""
+        call = VKCall.send_message(
+            peer_id, message, reply_to_conversation_message_id=reply_to_conversation_message_id,
+            extended_result=True, **params,
+        )
+        return SentMessage.from_response(await call.emit(self), peer_id)
+
+    async def edit_message(
+        self,
+        peer_id: int,
+        conversation_message_id: int,
+        message: str | None = None,
+        **params: Any,
+    ) -> int:
+        """Edit by the message ID local to a conversation, encoded as cmid."""
+        return await VKCall.edit_message(peer_id, conversation_message_id, message, **params).emit(self)
+
+    async def delete_message(
+        self,
+        peer_id: int,
+        conversation_message_id: int,
+        **params: Any,
+    ) -> dict:
+        """Delete by the message ID local to a conversation, encoded as cmids."""
+        return await VKCall.delete_message(peer_id, conversation_message_id, **params).emit(self)
 
     async def execute(self, code: str, **params: Any) -> Any:
         """

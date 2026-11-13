@@ -53,6 +53,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- `send_message()` returns `SentMessage` with `conversation_message_id` and an
+  optional global `message_id`; replies, edits, and deletions accept explicit
+  conversation IDs. Matching `VKCall` factories support direct and batch calls
+  without implicit formatting, mention, or delete-for-everyone policies.
+
 - `execute_detailed()` preserves the full response and nested `execute_errors`.
   `execute_batch_detailed()` returns ordered `VKCallResult` objects, splits calls
   into batches of 25, and never retries a batch because of a nested error.

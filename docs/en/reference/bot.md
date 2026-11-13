@@ -125,6 +125,33 @@ The pure functions `get_format_data_for_message()` and
 `prepare_formatted_message_params()` are available from `fastvk.formatting`.
 Preparation does not mutate the input and can be repeated safely.
 
+### send_message / edit_message / delete_message
+
+```python
+sent = await bot.send_message(123, "Hello", random_id=12345)
+await bot.send_message(123, "Reply", reply_to_conversation_message_id=sent.conversation_message_id)
+await bot.edit_message(123, sent.conversation_message_id, "Updated")
+await bot.delete_message(123, sent.conversation_message_id, delete_for_all=1)
+```
+
+`send_message()` sends to one `peer_id` using VK's `peer_ids` response form.
+It returns an immutable `SentMessage` with `peer_id`, `conversation_message_id`,
+and optional `message_id`. A missing local ID raises `RuntimeError`; a recipient
+API error raises `VKAPIError`. Global IDs are never substituted for local IDs.
+Text is optional for media-only messages. Extra API parameters, including
+`parse_mode`, `keyboard`, `attachment`, and `disable_mentions`, are forwarded.
+The generated `random_id` is reused across retries; pass your own stable value
+when retries must also survive restarts.
+
+The helpers use `conversation_message_id` in their signatures. VK receives
+`cmid` for edits, `cmids` for deletes, and `forward.conversation_message_ids`
+for replies. Generic `VKCall.send_message`, `VKCall.edit_message`, and
+`VKCall.delete_message` factories build the same requests for `.emit(bot)`
+or `execute_batch_detailed()`. To receive a local ID from a send factory, use
+`extended_result=True`, then `SentMessage.from_response(result.value, peer_id)`.
+No mention suppression, formatting, or delete-for-everyone policy is implicit.
+Existing `bot.messages.send(peer_id=...)` still returns a global ID.
+
 ### execute / execute_batch
 
 ```python

@@ -20,6 +20,7 @@ from .command import CommandArgs
 from .events import GroupJoinEvent, GroupLeaveEvent, WallPostEvent
 from .group import Group
 from .message import Message
+from .sent_message import SentMessage
 from .update import Update
 from .user import User
 
@@ -38,6 +39,7 @@ __all__ = [
     "Photo",
     "PhotoSize",
     "Poll",
+    "SentMessage",
     "Sticker",
     "Update",
     "User",

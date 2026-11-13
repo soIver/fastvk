@@ -125,6 +125,35 @@ user = await bot.get_user(123456, fields="photo_200,city")
 `prepare_formatted_message_params()` доступны из `fastvk.formatting`.
 Подготовка параметров не меняет исходный словарь и допускает повторный вызов.
 
+### send_message / edit_message / delete_message
+
+```python
+sent = await bot.send_message(123, "Hello", random_id=12345)
+await bot.send_message(123, "Reply", reply_to_conversation_message_id=sent.conversation_message_id)
+await bot.edit_message(123, sent.conversation_message_id, "Updated")
+await bot.delete_message(123, sent.conversation_message_id, delete_for_all=1)
+```
+
+`send_message()` отправляет сообщение одному `peer_id`, используя форму
+ответа VK для `peer_ids`. Возвращается неизменяемый `SentMessage` с `peer_id`,
+`conversation_message_id` и необязательным `message_id`. Отсутствие локального
+ID вызывает `RuntimeError`, ошибка получателя — `VKAPIError`. Глобальный ID
+никогда не подставляется вместо локального. Текст необязателен при отправке
+медиа. Дополнительные параметры API, включая `parse_mode`, `keyboard`,
+`attachment` и `disable_mentions`, передаются в запрос. Сгенерированный
+`random_id` сохраняется при повторах; для повторов после перезапуска передавайте
+собственное стабильное значение.
+
+Аргументы методов называются `conversation_message_id`. При обращении к VK
+используется `cmid` для редактирования, `cmids` для удаления и
+`forward.conversation_message_ids` для ответа. Фабрики `VKCall.send_message`,
+`VKCall.edit_message`, `VKCall.delete_message` создают такие же запросы для
+`.emit(bot)` или `execute_batch_detailed()`. Для получения локального ID при
+отправке через фабрику задайте `extended_result=True`, затем используйте
+`SentMessage.from_response(result.value, peer_id)`. Отключение упоминаний,
+форматирование и удаление для всех не включаются неявно.
+Прежний `bot.messages.send(peer_id=...)` продолжает возвращать глобальный ID.
+
 ### execute / execute_batch
 
 ```python
