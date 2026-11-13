@@ -5,6 +5,7 @@ import logging
 import random
 import tempfile
 from collections.abc import Awaitable, Callable
+from functools import partial
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, BinaryIO, TypeVar, cast
 
@@ -280,7 +281,7 @@ class Bot:
                 resp.raise_for_status()
                 async with open_file(create_temporary) as stream:
                     async for chunk in resp.content.iter_chunked(CHUNK_SIZE):
-                        await run_io(lambda chunk=chunk: stream.write(chunk))
+                        await run_io(partial(stream.write, chunk))
                 assert temporary is not None
                 await run_io(lambda: temporary.replace(destination))
             return destination
